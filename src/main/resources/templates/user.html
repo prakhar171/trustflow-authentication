@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="application/javascript">
+        function checkPasswordsMatch() {
+            const newPassword = document.getElementById("newPassword").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const matchIndicator = document.getElementById("passwordMatchIndicator");
+            if (newPassword === confirmPassword) {
+                matchIndicator.textContent = "Passwords match";
+                matchIndicator.style.color = "green";
+                return true;
+            } else {
+                matchIndicator.textContent = "Passwords do not match";
+                matchIndicator.style.color = "red";
+                return false;
+            }
+        }
+
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            if (!checkPasswordsMatch()) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            const oldPassword = document.getElementById("oldPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+
+            const response = await fetch('/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                    confirmPassword: newPassword
+                })
+            });
+
+            if (response.ok) {
+                alert("Password changed successfully");
+            } else {
+                const errorMessage = await response.text();
+                alert(`Error: ${errorMessage}`);
+            }
+        }
+
+        async function handleChangeInfo(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const nationality = document.getElementById('nationality').value;
+
+            const data = {
+                name,
+                phone,
+                email,
+                nationality
+            };
+
+            const response = await fetch('/change-info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                location.reload(); // Refresh the page
+                alert("Information updated successfully");
+            } else {
+                alert("Failed to update information");
+            }
+        }
+
+        async function handleDeleteUser(event) {
+            event.preventDefault();
+
+            const response = await fetch('/delete-data', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                alert("Account successfully deleted");
+                window.location.href = '/static/index.html';
+            } else {
+                alert("Failed to delete account");
+            }
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            if (message) {
+                alert(message);
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>User Profile</h1>
+<div class="flex-container">
+    <div class="flex-item">
+        <p><strong>Username:</strong> <span th:text="${username}"></span></p>
+        <p><strong>Name:</strong> <span th:text="${name}"></span></p>
+        <p><strong>Phone:</strong> <span th:text="${phone}"></span></p>
+        <p><strong>Email:</strong> <span th:text="${email}"></span></p>
+        <p><strong>Nationality:</strong> <span th:text="${nationality}"></span></p>
+        <form action="/logout" method="post" class="center-form">
+            <button type="submit">Logout</button>
+        </form>
+
+        <form onsubmit="handleDeleteUser(event)" class="center-form">
+            <button type="submit">Delete Data</button>
+        </form>
+    </div>
+
+    <div class="clear"></div>
+
+    <div class="center-form">
+        <div class="flex-item">
+            <h2>Change Information</h2>
+            <form onsubmit="handleChangeInfo(event)">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="phone">Phone:</label>
+                <input type="text" id="phone" name="phone" required>
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" required>
+                <label for="nationality">Nationality:</label>
+                <select id="nationality" name="nationality" required>
+                    <option value="USA">USA</option>
+                    <option value="Canada">Canada</option>
+                    <option value="UK">UK</option>
+                    <option value="Netherlands">Netherlands</option>
+                    <option value="India">India</option>
+                    <option value="Belgium">Belgium</option>
+                    <option value="Other">Other</option>
+                </select>
+                <button type="submit">Change Information</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<h2>Change Password</h2>
+<form onsubmit="handleChangePassword(event)">
+    <label for="oldPassword">Old Password:</label>
+    <input type="password" id="oldPassword" name="oldPassword" required>
+    <label for="newPassword">New Password:</label>
+    <input type="password" id="newPassword" name="newPassword" required oninput="checkPasswordsMatch()">
+    <label for="confirmPassword">Confirm New Password:</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" required oninput="checkPasswordsMatch()">
+    <span id="passwordMatchIndicator"></span>
+    <button type="submit">Change Password</button>
+</form>
+<img src="/static/images/TrustFlow.png" alt="Bottom Right Image" class="bottom-right-image">
+
+</body>
+</html>

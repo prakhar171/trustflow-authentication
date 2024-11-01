@@ -1,0 +1,166 @@
+<html>
+<head>
+    <title>Login and Signup</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="application/javascript">
+        function toggleSignup() {
+            const signupForm = document.getElementById("signupForm");
+            signupForm.style.display = "block";
+            const signupButton = document.getElementById("signupButton");
+            signupButton.style.display = "none";
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function checkPasswordsMatch() {
+            const password = document.signupForm.password.value;
+            const confirmPassword = document.signupForm.confirmPassword.value;
+            const matchIndicator = document.getElementById("passwordMatchIndicator");
+            if (password === confirmPassword) {
+                matchIndicator.textContent = "Passwords match";
+                matchIndicator.style.color = "green";
+            } else {
+                matchIndicator.textContent = "Passwords do not match";
+                matchIndicator.style.color = "red";
+            }
+        }
+
+        async function handleLogin() {
+            const username = document.loginForm.username.value;
+            const password = document.loginForm.password.value;
+
+            console.log("Username:", username);
+            console.log("Password:", password);
+
+            const data = {
+                username,
+                password
+            };
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = "/user";
+            } else {
+                alert("Login failed");
+            }
+
+            return false;
+        }
+
+
+        async function handleSignup() {
+            const email = document.signupForm.email.value;
+            if (!validateEmail(email)) {
+                alert("Invalid email address");
+                return false;
+            }
+            const name = document.signupForm.name.value;
+            const username = document.signupForm.username.value;
+            const phoneNumber = document.signupForm.phoneNumber.value;
+            const nationality = document.signupForm.nationality.value;
+            const password = document.signupForm.password.value;
+            const confirmPassword = document.signupForm.confirmPassword.value;
+            if (password !== confirmPassword) {
+                alert("Passwords do not match");
+                return false;
+            }
+
+            const data = {
+                name,
+                username,
+                phone: phoneNumber,
+                email,
+                nationality,
+                password
+            };
+
+            const response = await fetch('/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert("Signup successful");
+            } else if (response.status === 409) {
+                alert("Username already exists");
+            } else {
+                alert("Signup failed");
+            }
+
+            return false;
+        }
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const message = urlParams.get('message');
+            if (message) {
+                alert(message);
+            }
+        }
+    </script>
+</head>
+<body>
+<!--<h1>Login and Signup</h1>-->
+<h1>Welcome to the Main Screen</h1>
+<!--<p th:if="${param.message}" th:text="${param.message}"></p>-->
+
+<!-- Login Form -->
+<form name="loginForm" action="javascript:void(0)" onsubmit="return handleLogin()">
+    <h2>Login</h2>
+    <label for="inp-username">Username</label>
+    <input type="text" id="inp-username" name="username" required>
+    <label for="inp-password">Password</label>
+    <input type="password" id="inp-password" name="password" required>
+    <input type="submit" value="Login">
+</form>
+
+<!-- Signup Form -->
+<form name="signupForm" id="signupForm" action="javascript:void(0)" style="display:none" onsubmit="return handleSignup()">
+    <h2>Signup</h2>
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required>
+    <label for="username">username</label>
+    <input type="text" id="username" name="username" required>
+    <label for="phoneNumber">Phone Number</label>
+    <input type="text" id="phoneNumber" name="phoneNumber" required>
+    <label for="email">Email</label>
+    <input type="text" id="email" name="email" required>
+    <label for="nationality">Nationality</label>
+    <select id="nationality" name="nationality" required>
+        <option value="USA">USA</option>
+        <option value="Canada">Canada</option>
+        <option value="UK">UK</option>
+        <option value="Netherlands">Netherlands</option>
+        <option value="India">India</option>
+        <option value="Belgium">Belgium</option>
+        <option value="Other">Other</option>
+        <!-- Add more options as needed -->
+    </select>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required oninput="checkPasswordsMatch()">
+    <label for="confirmPassword">Confirm Password</label>
+    <input type="password" id="confirmPassword" name="confirmPassword" required oninput="checkPasswordsMatch()">
+    <span id="passwordMatchIndicator"></span>
+    <input type="submit" value="Signup">
+</form>
+
+<!-- Toggle Signup Form -->
+<button id="signupButton" onclick="toggleSignup()">Signup</button>
+<img src="/static/images/TrustFlow.png" alt="Bottom Right Image" class="bottom-right-image">
+
+
+</body>
+</html>
